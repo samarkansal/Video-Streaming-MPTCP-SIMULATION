@@ -10,6 +10,21 @@ def start_thread(listener,address):
 	t = (listener,address)
 	Thread(target = utils.accept_connections_forever,args = t).start()
 
+def update_round_time(socks,addresses):
+	while True:		
+		one_way_time = []
+		for sock,address in zip(socks,address):
+			cur_serv_time = current_milli_time()
+			sock.send(struct.pack(">LL",0,cur_serv_time))
+			time_taken = utils.recv_until(sock,b'?').decode('utf-8')
+			time_taken = int(time_taken[:len(time_taken)-1])
+			one_way_time.append((time_taken,address[1])
+		one_way_time.sort()
+		time_ref = one_way_time[0]
+		one_way_time = [x-time_ref for x in one_way_time]
+		for tup in one_way_time:
+			server_global.subflow_wait_time[tup[1]] = tup[0]
+
 
 if __name__ == '__main__':
 
@@ -27,6 +42,8 @@ if __name__ == '__main__':
 
 	for address,listener in zip(addresses,listeners):
 		start_thread(listener,address)
+
+
 
 	while(cap.isOpened()):
 		ret,frame = cap.read()

@@ -39,8 +39,21 @@ def handle_conversation(sock, address, address_serv):
 
 def send_frame(sock,address,address_serv):
 	try:
+		time.sleep(server_global.subflow_wait_time[address_serv[1]])
 		sock.send(server_global.qu.popleft())
 		print(str(address_serv[1]) + ' sends a packet to {}'.format(address))
 	except IndexError as e:
 		pass
+
+def recv_until(sock, suffix):
+    """Receive bytes over socket `sock` until we receive the `suffix`."""
+    message = sock.recv(4)
+    if not message:
+        raise EOFError('socket closed')
+    while not message.endswith(suffix):
+        data = sock.recv(4)
+        if not data:
+            raise IOError('received {!r} then socket closed'.format(message))
+        message += data
+    return message
 	
