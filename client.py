@@ -5,6 +5,8 @@ from threading import Thread
 
 qu = []
 
+current_milli_time = lambda: int(round(time.time() * 1000))
+
 def fill_qu(sock,address):
 	global qu
 	data = b""
@@ -19,6 +21,12 @@ def fill_qu(sock,address):
 		msg_size = result[0]
 
 		timestamp = result[1]
+
+		if msg_size==0:
+			current_client_time = current_milli_time()
+			time_dif = (str(current_client_time - timestamp)+"?").encode(utf-8)
+			sock.send(time_dif)
+			continue
 
 		data = data[payload_size:]
 		while len(data) < msg_size:
